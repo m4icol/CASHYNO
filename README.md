@@ -60,6 +60,7 @@ alembic upgrade head
 ### Levantar el servidor
 
 ```bash
+venv\Scripts\activate
 uvicorn app.main:app --reload
 ```
 
