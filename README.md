@@ -25,6 +25,7 @@ cd casino-system
 ## 2. Base de datos (PostgreSQL)
 
 Abrir pgAdmin o psql y crear las dos bases de datos:
+Object-Relational Mapping.
 
 ```sql
 CREATE DATABASE casino_db;
@@ -45,8 +46,6 @@ python -m venv venv
 # Activar entorno virtual
 # Windows:
 venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
 
 # Instalar dependencias
 pip install -r requirements.txt
