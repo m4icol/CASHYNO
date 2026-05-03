@@ -10,9 +10,9 @@ export interface TokenResponse {
   nombre: string
 }
 
-export interface MenuItem {
-  icon: string
-  label: string
-  desc: string
-  color: string
+export type MenuItem = {
+  icon:   string
+  label:  string
+  desc:   string
+  accent: string  
 }

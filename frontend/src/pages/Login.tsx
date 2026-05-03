@@ -34,22 +34,22 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-[#1a1a2e] to-[#16213e] flex items-center justify-center font-sans">
-      <div className="w-[380px] bg-white/5 backdrop-blur-md border border-yellow-400/20 rounded-2xl p-10 shadow-2xl">
+    <div className="min-h-screen bg-background flex items-center justify-center font-sans">
+      <div className="w-[380px] bg-card border border-border rounded-2xl p-10 shadow-xl">
 
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="text-6xl mb-2">♠</div>
-          <h1 className="text-yellow-400 text-3xl font-bold tracking-[6px]">CASHYNO</h1>
-          <p className="text-white/40 text-sm mt-1">Sistema de Gestión</p>
+          <div className="text-6xl mb-2">🃏</div>
+          <h1 className="text-foreground text-3xl font-bold tracking-[6px]">CASHYNO</h1>
+          <p className="text-muted-foreground text-sm mt-1">Sistema de Gestión</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-white/70 text-sm font-medium">Usuario</label>
+            <label className="text-foreground text-sm font-medium">Usuario</label>
             <input
-              className="bg-white/8 border border-yellow-400/30 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-yellow-400/70 transition-colors placeholder:text-white/20"
+              className="bg-input border border-border rounded-lg px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-ring transition-all placeholder:text-muted-foreground"
               value={username}
               onChange={e => setUsername(e.target.value)}
               placeholder="Ingresa tu usuario"
@@ -58,9 +58,9 @@ export default function Login() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-white/70 text-sm font-medium">Contraseña</label>
+            <label className="text-foreground text-sm font-medium">Contraseña</label>
             <input
-              className="bg-white/8 border border-yellow-400/30 rounded-lg px-4 py-3 text-white text-sm outline-none focus:border-yellow-400/70 transition-colors placeholder:text-white/20"
+              className="bg-input border border-border rounded-lg px-4 py-3 text-foreground text-sm outline-none focus:ring-2 focus:ring-ring transition-all placeholder:text-muted-foreground"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
@@ -70,30 +70,30 @@ export default function Login() {
           </div>
 
           {error && (
-            <p className="text-red-400 text-sm text-center">{error}</p>
+            <p className="text-destructive text-sm text-center">{error}</p>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="mt-1 bg-gradient-to-r from-yellow-400 to-orange-400 text-black font-bold py-3 rounded-lg text-sm hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
+            className="mt-1 bg-primary text-primary-foreground font-bold py-3 rounded-lg text-sm hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
           >
             {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
 
         {/* Hints */}
-        <div className="mt-7 pt-5 border-t border-white/10">
-          <p className="text-white/30 text-xs text-center mb-3">Usuarios de prueba — click para autocompletar</p>
+        <div className="mt-7 pt-5 border-t border-border">
+          <p className="text-muted-foreground text-xs text-center mb-3">Usuarios de prueba — click para autocompletar</p>
           <div className="flex flex-col gap-2">
             {hints.map(h => (
               <div
                 key={h.u}
                 onClick={() => { setUsername(h.u); setPassword(h.p) }}
-                className="flex justify-between items-center px-3 py-2 rounded-lg bg-white/4 hover:bg-white/10 cursor-pointer transition-colors"
+                className="flex justify-between items-center px-3 py-2 rounded-lg bg-secondary hover:bg-accent cursor-pointer transition-colors"
               >
-                <span className="text-yellow-400 text-sm font-semibold">{h.u}</span>
-                <span className="text-white/40 text-xs">{h.r}</span>
+                <span className="text-secondary-foreground text-sm font-semibold">{h.u}</span>
+                <span className="text-muted-foreground text-xs">{h.r}</span>
               </div>
             ))}
           </div>
