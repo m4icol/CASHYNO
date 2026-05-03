@@ -1,7 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap');
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 @custom-variant dark (&:is(.dark *));
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    letter-spacing: var(--tracking-normal);
+  }
+}
 
 :root {
   --background: #e9e4d8;
@@ -36,7 +46,7 @@
   --sidebar-accent-foreground: #2e2e2e;
   --sidebar-border: #d2cbbb;
   --sidebar-ring: #2e2e2e;
-  --font-sans: "Inter", sans-serif;
+  --font-sans: "Onest", sans-serif;
   --font-serif: "Playfair Display", serif;
   --font-mono: "JetBrains Mono", monospace;
   --radius: 0.5rem;
@@ -91,7 +101,7 @@
   --sidebar-accent-foreground: #d1cfc0;
   --sidebar-border: #2c2c2c;
   --sidebar-ring: #d1cfc0;
-  --font-sans: "Inter", sans-serif;
+  --font-sans: "Onest", sans-serif;
   --font-serif: "Playfair Display", serif;
   --font-mono: "JetBrains Mono", monospace;
   --radius: 0.5rem;
@@ -145,7 +155,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --font-sans: var(--font-sans);
+  --font-sans: "Onest", sans-serif;
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
 

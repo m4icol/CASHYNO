@@ -2,12 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/axios'
 import type { TokenResponse } from '../types'
-
-const hints = [
-  { u: 'admin',      p: 'admin123', r: 'Administrador' },
-  { u: 'supervisor', p: 'super123', r: 'Supervisor'    },
-  { u: 'juan',       p: 'juan123',  r: 'Jugador'       },
-]
+import { hints } from '@/types/hints'
 
 export default function Login() {
   const [username, setUsername] = useState('')
@@ -40,7 +35,7 @@ export default function Login() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="text-6xl mb-2">🃏</div>
-          <h1 className="text-foreground text-3xl font-bold tracking-[6px]">CASHYNO</h1>
+          <h1 className="text-foreground text-3xl font-black tracking-[6px]">CASHYNO</h1>
           <p className="text-muted-foreground text-sm mt-1">Sistema de Gestión</p>
         </div>
 
