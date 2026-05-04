@@ -12,6 +12,10 @@ export default function Menu() {
     navigate('/login')
   }
 
+  const handleCardClick = (label: string) => {
+    if (label === 'Ruleta') navigate('/ruleta')
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
 
@@ -39,7 +43,7 @@ export default function Menu() {
       </header>
 
       {/* Content */}
-      <main className="flex-1 px-8 py-10">
+      <main className="flex-1 px-70 py-10">
         <h2 className="text-foreground text-2xl font-light mb-1">
           Bienvenido, <span className="text-primary font-semibold">{nombre.split(' ')[0]}</span>
         </h2>
@@ -48,6 +52,7 @@ export default function Menu() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
           {items.map((item) => (
             <div
+            onClick={() => handleCardClick(item.label)}
               key={item.label}
               className={`bg-card border border-border border-l-4 ${item.accent} rounded-2xl p-6 cursor-pointer hover:-translate-y-1.5 hover:shadow-lg transition-all duration-200`}
             >
@@ -60,7 +65,7 @@ export default function Menu() {
       </main>
 
       {/* Stats bar */}
-      <footer className="flex justify-around px-8 py-4 bg-card border-t border-border">
+      <footer className="flex justify-between px-72 py-4 bg-card border-t border-border">
         {stats.map(s => (
           <div key={s.label} className="text-center">
             <span className="text-foreground text-xl font-bold block">{s.value}</span>
