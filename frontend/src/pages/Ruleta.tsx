@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useBalance } from '../hooks/useBalance'
 
+// ─── Constants ────────────────────────────────────────────────────────────────
 const NUMBERS = [
   { n: 0,  c: 'green'  },
   { n: 32, c: 'red'    }, { n: 15, c: 'black'  }, { n: 19, c: 'red'    },
@@ -17,40 +19,46 @@ const NUMBERS = [
   { n: 35, c: 'black'  }, { n: 3,  c: 'red'    }, { n: 26, c: 'black'  },
 ]
 
-const REPEATS  = 8
-const TILE_W   = 78 + 6
+const REPEATS = 8
+const TILE_W  = 78 + 6   // tile width + gap
 
 const BETS = [
-  { id: 'red',   label: 'Rojo',     multiplier: 2  },
-  { id: 'black', label: 'Negro',    multiplier: 2  },
-  { id: 'green', label: 'Verde',    multiplier: 14 },
-  { id: 'even',  label: 'Par',      multiplier: 2  },
-  { id: 'odd',   label: 'Impar',    multiplier: 2  },
+  { id: 'red',   label: 'Rojo',  multiplier: 2  },
+  { id: 'black', label: 'Negro', multiplier: 2  },
+  { id: 'green', label: 'Verde', multiplier: 14 },
+  { id: 'even',  label: 'Par',   multiplier: 2  },
+  { id: 'odd',   label: 'Impar', multiplier: 2  },
 ]
 
 const CHIPS = [1000, 5000, 10000, 50000]
 
+// ─── Easing ───────────────────────────────────────────────────────────────────
 function easeOut(t: number) {
   return 1 - Math.pow(1 - t, 4)
 }
 
+// ─── Main component ───────────────────────────────────────────────────────────
 export default function Ruleta() {
-  const navigate  = useNavigate()
-  const nombre    = localStorage.getItem('nombre') ?? 'Jugador'
+  const navigate = useNavigate()
+  const nombre   = localStorage.getItem('nombre') ?? 'Jugador'
 
-  const [balance, setBalance]     = useState(100000)
-  const [betAmount, setBetAmount] = useState(1000)
+  const { balance, updateBalance } = useBalance()
+
+  const [betAmount, setBetAmount]     = useState(1000)
   const [selectedBet, setSelectedBet] = useState<string | null>(null)
-  const [spinning, setSpinning]   = useState(false)
-  const [resultNum, setResultNum] = useState<number | null>(null)
+  const [spinning, setSpinning]       = useState(false)
+  const [resultNum, setResultNum]     = useState<number | null>(null)
   const [resultColor, setResultColor] = useState<string>('')
-  const [outcome, setOutcome]     = useState<'win' | 'lose' | null>(null)
-  const [lastWin, setLastWin]     = useState<number>(0)
+  const [outcome, setOutcome]         = useState<'win' | 'lose' | null>(null)
+  const [delta, setDelta]             = useState<number>(0)
 
-  const trackRef  = useRef<HTMLDivElement>(null)
-  const currentX  = useRef(0)
+  const trackRef    = useRef<HTMLDivElement>(null)
+  const currentX    = useRef(0)
   const initialized = useRef(false)
+  // Snapshot balance at spin time to avoid stale closure inside rAF callback
+  const balanceSnapshot = useRef(balance)
 
+  // ── Track init ────────────────────────────────────────────────────────────────
   const initTrack = (el: HTMLDivElement) => {
     if (initialized.current) return
     initialized.current = true
@@ -61,22 +69,30 @@ export default function Ruleta() {
     el.style.transform = `translateX(${center}px)`
   }
 
+  // ── Spin ──────────────────────────────────────────────────────────────────────
   const spin = () => {
     if (spinning || !selectedBet || betAmount > balance) return
+
+    // Deduct bet upfront and snapshot the resulting balance
+    const afterDebit = balance - betAmount
+    updateBalance(afterDebit)
+    balanceSnapshot.current = afterDebit
+
     setSpinning(true)
     setOutcome(null)
     setResultNum(null)
+    setDelta(0)
 
     const landIndex = Math.floor(Math.random() * NUMBERS.length)
     const landed    = NUMBERS[landIndex]
 
-    const wrapStart  = NUMBERS.length * 3
-    const targetIdx  = wrapStart + landIndex
+    const wrapStart    = NUMBERS.length * 3
+    const targetIdx    = wrapStart + landIndex
     const wrapperWidth = trackRef.current!.parentElement!.offsetWidth
-    const center     = wrapperWidth / 2 - TILE_W / 2
-    const targetX    = -(targetIdx * TILE_W - center)
-    const extraSpins = (3 + Math.floor(Math.random() * 2)) * NUMBERS.length * TILE_W
-    const finalX     = targetX - extraSpins
+    const center       = wrapperWidth / 2 - TILE_W / 2
+    const targetX      = -(targetIdx * TILE_W - center)
+    const extraSpins   = (3 + Math.floor(Math.random() * 2)) * NUMBERS.length * TILE_W
+    const finalX       = targetX - extraSpins
 
     const duration  = 3400 + Math.random() * 600
     const startTime = performance.now()
@@ -84,8 +100,8 @@ export default function Ruleta() {
     const distance  = finalX - startX
 
     const animate = (now: number) => {
-      const t      = Math.min((now - startTime) / duration, 1)
-      const x      = startX + distance * easeOut(t)
+      const t = Math.min((now - startTime) / duration, 1)
+      const x = startX + distance * easeOut(t)
       trackRef.current!.style.transform = `translateX(${x}px)`
 
       if (t < 1) {
@@ -99,6 +115,7 @@ export default function Ruleta() {
     requestAnimationFrame(animate)
   }
 
+  // ── Resolve ───────────────────────────────────────────────────────────────────
   const resolveResult = (landed: typeof NUMBERS[0]) => {
     const { n, c } = landed
     setResultNum(n)
@@ -112,17 +129,21 @@ export default function Ruleta() {
     if (selectedBet === 'odd'   && n % 2 !== 0)            win = true
 
     const bet = BETS.find(b => b.id === selectedBet)!
+
     if (win) {
-      const profit = betAmount * bet.multiplier - betAmount
-      setBalance(prev => prev + profit)
-      setLastWin(betAmount * bet.multiplier)
+      // Full payout: return bet + winnings
+      const payout = betAmount * bet.multiplier
+      updateBalance(balanceSnapshot.current + payout)
+      setDelta(payout - betAmount)   // net profit shown to user
     } else {
-      setBalance(prev => prev - betAmount)
-      setLastWin(0)
+      // Already debited on spin — no further change
+      setDelta(-betAmount)
     }
+
     setOutcome(win ? 'win' : 'lose')
   }
 
+  // ── Tile utils ────────────────────────────────────────────────────────────────
   const allTiles = Array.from({ length: REPEATS }, () => NUMBERS).flat()
 
   const tileColor = (c: string) => {
@@ -131,6 +152,7 @@ export default function Ruleta() {
     return 'bg-green-800 border border-green-700'
   }
 
+  // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
 
@@ -159,7 +181,7 @@ export default function Ruleta() {
 
       <main className="flex-1 flex flex-col items-center justify-center gap-8 px-4 py-10">
 
-        {/* Balance */}
+        {/* Balance + delta */}
         <div className="flex items-center gap-8">
           <div className="text-center">
             <p className="text-muted-foreground text-xs tracking-widest uppercase mb-1">Balance</p>
@@ -168,7 +190,7 @@ export default function Ruleta() {
           {outcome === 'win' && (
             <div className="text-center">
               <p className="text-muted-foreground text-xs tracking-widest uppercase mb-1">Ganaste</p>
-              <p className="text-green-500 text-3xl font-bold">+${lastWin.toLocaleString()}</p>
+              <p className="text-green-500 text-3xl font-bold">+${delta.toLocaleString()}</p>
             </div>
           )}
           {outcome === 'lose' && (
@@ -179,20 +201,25 @@ export default function Ruleta() {
           )}
         </div>
 
-        {/* Track */}
+        {/* Wheel track */}
         <div className="relative w-full max-w-2xl h-[90px] overflow-hidden">
-          {/* fades */}
-          <div className="absolute inset-y-0 left-0 w-28 z-10 pointer-events-none"
-            style={{ background: 'linear-gradient(to right, var(--background), transparent)' }} />
-          <div className="absolute inset-y-0 right-0 w-28 z-10 pointer-events-none"
-            style={{ background: 'linear-gradient(to left, var(--background), transparent)' }} />
-          {/* pointer */}
+          {/* Edge fades */}
+          <div
+            className="absolute inset-y-0 left-0 w-28 z-10 pointer-events-none"
+            style={{ background: 'linear-gradient(to right, var(--background), transparent)' }}
+          />
+          <div
+            className="absolute inset-y-0 right-0 w-28 z-10 pointer-events-none"
+            style={{ background: 'linear-gradient(to left, var(--background), transparent)' }}
+          />
+          {/* Pointer */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[3px] h-full bg-primary z-20">
             <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-0 h-0
               border-l-[6px] border-r-[6px] border-t-[8px]
-              border-l-transparent border-r-transparent border-t-primary" />
+              border-l-transparent border-r-transparent border-t-primary"
+            />
           </div>
-          {/* tiles */}
+          {/* Tiles */}
           <div
             ref={el => { if (el) initTrack(el) }}
             className="flex items-center h-full"
@@ -210,7 +237,7 @@ export default function Ruleta() {
           </div>
         </div>
 
-        {/* Result */}
+        {/* Result number */}
         <div className="h-14 flex flex-col items-center justify-center gap-1">
           {resultNum !== null ? (
             <>
@@ -262,7 +289,7 @@ export default function Ruleta() {
           ))}
         </div>
 
-        {/* Spin */}
+        {/* Spin button */}
         <button
           onClick={spin}
           disabled={spinning || !selectedBet || betAmount > balance}
@@ -271,7 +298,7 @@ export default function Ruleta() {
           {spinning ? 'Girando...' : `Apostar $${betAmount.toLocaleString()}`}
         </button>
 
-        {balance <= 0 && (
+        {balance <= 0 && !spinning && (
           <p className="text-destructive text-sm tracking-widest">Sin fondos — recarga tu cuenta</p>
         )}
 

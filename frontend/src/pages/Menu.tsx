@@ -14,7 +14,9 @@ export default function Menu() {
 
   const handleCardClick = (label: string) => {
     if (label === 'Ruleta') navigate('/ruleta')
+    if (label === 'BlackJack') navigate('/blackjack')
   }
+
 
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">

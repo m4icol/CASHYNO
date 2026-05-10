@@ -27,8 +27,8 @@ export const menuItems: Record<string, MenuItem[]> = {
     jugador: [
     { icon: '🎮', label: 'Juegos',       desc: 'Ver juegos disponibles',          accent: 'border-l-green-500'   },
     { icon: '🎰', label: 'Mesas',        desc: 'Ver mesas disponibles',           accent: 'border-l-yellow-500'  },
-    { icon: '🔴', label: 'Ruleta',       desc: 'Jugar ruleta en línea',           accent: 'border-l-red-500'     },
-    { icon: '🎲', label: 'Mis apuestas', desc: 'Historial de apuestas',           accent: 'border-l-red-500'     },
+    { icon: '🎲', label: 'Ruleta',       desc: 'Jugar ruleta en línea',           accent: 'border-l-red-500'     },
+    { icon: '🃏', label: 'BlackJack', desc: 'Jugar ruleta en línea',           accent: 'border-l-blue-500'     },
     { icon: '🏆', label: 'Mis premios',  desc: 'Premios y pagos pendientes',      accent: 'border-l-orange-500'  },
     ],
 }
