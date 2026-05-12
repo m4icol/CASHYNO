@@ -1,5 +1,5 @@
 export const hints = [
-  { u: 'admin',      p: 'admin123', r: 'Administrador' },
-  { u: 'supervisor', p: 'super123', r: 'Supervisor'    },
-  { u: 'juan',       p: 'juan123',  r: 'Jugador'       },
+  { u: 'admin',      p: '1234', r: 'Administrador' },
+  { u: 'supervisor', p: '1234', r: 'Supervisor'    },
+  { u: 'juan',       p: '1234',  r: 'Jugador'       },
 ]

@@ -173,37 +173,31 @@ export default function BlackJack() {
   }, [apuesta, updateBalance])
 
   // ── Hit ───────────────────────────────────────────────────────────────────────
-  const pedir = useCallback(() => {
-    if (fase !== 'jugando' || pidiendo.current) return
-    pidiendo.current = true
+const pedir = useCallback(() => {
+  if (fase !== 'jugando' || pidiendo.current) return
+  pidiendo.current = true
 
-    setTimeout(() => {
-      setBaraja(prevBaraja => {
-        const [carta, ...resto] = prevBaraja
-        setManoJugador(mj => {
-          const nuevaMano = [...mj, carta]
-          const total = calcularMano(nuevaMano)
+  setTimeout(() => {
+    const [carta, ...resto] = baraja          // read from ref/state directly
+    const nuevaMano = [...manoJugador, carta]
+    const total = calcularMano(nuevaMano)
 
-          if (total > 21) {
-            setManoCasa(mc => mc.map(c => ({ ...c, oculta: false })))
-            setDeltaBalance(-apuesta)
-            setResultado('derrota')
-            setMensaje(`Te pasaste con ${total} 💀`)
-            setFase('terminado')
-          } else if (total === 21) {
-            setManoCasa(mc => {
-              plantarseConMano(nuevaMano, resto, mc)
-              return mc
-            })
-          }
+    setBaraja(resto)
+    setManoJugador(nuevaMano)
 
-          return nuevaMano
-        })
-        return resto
-      })
-      pidiendo.current = false
-    }, 200)
-  }, [fase, apuesta, plantarseConMano])
+    if (total > 21) {
+      setManoCasa(mc => mc.map(c => ({ ...c, oculta: false })))
+      setDeltaBalance(-apuesta)
+      setResultado('derrota')
+      setMensaje(`Te pasaste con ${total} 💀`)
+      setFase('terminado')
+    } else if (total === 21) {
+      plantarseConMano(nuevaMano, resto, manoCasa)
+    }
+
+    pidiendo.current = false
+  }, 200)
+}, [fase, apuesta, baraja, manoJugador, manoCasa, plantarseConMano])
 
   // ── Stand ─────────────────────────────────────────────────────────────────────
   const plantarse = useCallback(() => {

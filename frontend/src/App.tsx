@@ -4,6 +4,7 @@ import Menu from './pages/Menu'
 import Ruleta from './pages/Ruleta'
 import BlackJack from './pages/Blackjack'
 import './index.css'
+import Register from './pages/Register'
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token')
@@ -23,6 +24,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login"     element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/menu"      element={<PrivateRoute><Menu /></PrivateRoute>} />
         <Route path="/ruleta"    element={<JugadorRoute><Ruleta /></JugadorRoute>} />
         <Route path="/blackjack" element={<JugadorRoute><BlackJack /></JugadorRoute>} />

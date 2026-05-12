@@ -44,10 +44,10 @@ def seed(db: Session = Depends(get_db)):
     jugadores = [
         Jugador(nombre="juan",  apellido="Perez",  fecha_nacimiento=date(1992,3,15),
                 fecha_registro=date(2024,1,1), estado="ACTIVO",
-                password_hash=hash_password("juan123")),
+                password_hash=hash_password("1234")),
         Jugador(nombre="maria", apellido="Torres", fecha_nacimiento=date(1995,8,22),
                 fecha_registro=date(2024,2,1), estado="ACTIVO",
-                password_hash=hash_password("maria123")),
+                password_hash=hash_password("1234")),
     ]
     db.add_all(jugadores)
 
