@@ -2,6 +2,9 @@ import { useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBalance } from '../hooks/useBalance'
 import { CartaUI } from '@/components/Card'
+import { useHistorial } from '@/hooks/useHistorial'
+
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type Palo  = '♠' | '♥' | '♦' | '♣'
@@ -59,6 +62,7 @@ export function esBlackjack(mano: Carta[]): boolean {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function BlackJack() {
+  const { registrar } = useHistorial()
   const navigate = useNavigate()
   const nombre   = localStorage.getItem('nombre') ?? 'Jugador'
 
@@ -101,26 +105,28 @@ export default function BlackJack() {
     setMensaje('')
     setDeltaBalance(0)
 
-    if (esBlackjack(mj)) {
-      const mc2 = mc.map(c => ({ ...c, oculta: false }))
-      setManoCasa(mc2)
-      if (esBlackjack(mc2)) {
-        // Push — refund bet
-        updateBalance(nuevoBalance + apuesta)
-        setDeltaBalance(0)
-        setResultado('empate')
-        setMensaje('¡Empate! Los dos con Blackjack')
-      } else {
-        // Blackjack pays 3:2
-        const ganancia = Math.floor(apuesta * 2.5)
-        updateBalance(nuevoBalance + ganancia)
-        setDeltaBalance(ganancia - apuesta)
-        setResultado('blackjack')
-        setMensaje('¡BLACKJACK! Pago 3:2 🎉')
-      }
-      setFase('terminado')
-      return
-    }
+if (esBlackjack(mj)) {
+  const mc2 = mc.map(c => ({ ...c, oculta: false }))
+  setManoCasa(mc2)
+  
+  if (esBlackjack(mc2)) {
+    updateBalance(nuevoBalance + apuesta)
+    setDeltaBalance(0)
+    setResultado('empate')
+    setMensaje('¡Empate! Los dos con Blackjack')
+    registrar('BlackJack', apuesta, 0)                        // ← agrega
+  } else {
+    const ganancia = Math.floor(apuesta * 2.5)
+    updateBalance(nuevoBalance + ganancia)
+    setDeltaBalance(ganancia - apuesta)
+    setResultado('blackjack')
+    setMensaje('¡BLACKJACK! Pago 3:2 🎉')
+    registrar('BlackJack', apuesta, ganancia - apuesta)       // ← agrega
+  }
+  
+  setFase('terminado')
+  return
+}
 
     setFase('jugando')
   }, [apuesta, balance, updateBalance])
@@ -156,17 +162,20 @@ export default function BlackJack() {
       setMensaje(totalC > 21
         ? `¡Casa se pasó! (${totalC}) Ganaste 🏆`
         : `Ganaste! ${totalJ} vs ${totalC} 🏆`)
+      registrar('BlackJack', apuesta, apuesta) 
     } else if (totalJ < totalC) {
       // Already debited — nothing more to do
       setDeltaBalance(-apuesta)
       setResultado('derrota')
       setMensaje(`Perdiste. ${totalJ} vs ${totalC} 😞`)
+      registrar('BlackJack', apuesta, -apuesta) 
     } else {
       // Push — refund bet
       updateBalance(base + apuesta)
       setDeltaBalance(0)
       setResultado('empate')
       setMensaje(`Empate! ${totalJ} vs ${totalC} 🤝`)
+      registrar('BlackJack', apuesta, 0)
     }
 
     setFase('terminado')
@@ -191,6 +200,7 @@ const pedir = useCallback(() => {
       setResultado('derrota')
       setMensaje(`Te pasaste con ${total} 💀`)
       setFase('terminado')
+      registrar('BlackJack', apuesta, -apuesta)
     } else if (total === 21) {
       plantarseConMano(nuevaMano, resto, manoCasa)
     }

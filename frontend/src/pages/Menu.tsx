@@ -15,6 +15,7 @@ export default function Menu() {
   const handleCardClick = (label: string) => {
     if (label === 'Ruleta') navigate('/ruleta')
     if (label === 'BlackJack') navigate('/blackjack')
+    if (label === 'Historial') navigate('/historial')
   }
 
 

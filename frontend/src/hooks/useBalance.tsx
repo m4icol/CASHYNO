@@ -1,34 +1,50 @@
 import { useState, useEffect, useCallback } from 'react'
+import api from '../api/axios'
 
-const KEY     = 'cashyno_balance'
-const DEFAULT = 100_000
 const EVENT   = 'balancechange'
-
-function readBalance(): number {
-  const raw    = localStorage.getItem(KEY)
-  const parsed = raw ? parseInt(raw, 10) : NaN
-  return isNaN(parsed) ? DEFAULT : parsed
-}
+const DEFAULT = 100_000
 
 export function useBalance() {
-  const [balance, setBalance] = useState<number>(readBalance)
+  const [balance, setBalance]   = useState<number>(DEFAULT)
+  const [loading, setLoading]   = useState<boolean>(true)
 
-  // Sync when another game updates the balance (same tab via custom event, other tabs via storage)
+  // Load from backend on mount
   useEffect(() => {
-    const sync = () => setBalance(readBalance())
+    const role = localStorage.getItem('role')
+    if (role !== 'jugador') { setLoading(false); return }
+
+    api.get('/jugadores/me/saldo')
+      .then(res => setBalance(res.data.saldo))
+      .catch(() => {
+        // fallback to localStorage if backend fails
+        const raw    = localStorage.getItem('cashyno_balance')
+        const parsed = raw ? parseInt(raw, 10) : NaN
+        setBalance(isNaN(parsed) ? DEFAULT : parsed)
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
+  // Sync between tabs / components (same session)
+  useEffect(() => {
+    const sync = () => {
+      api.get('/jugadores/me/saldo')
+        .then(res => setBalance(res.data.saldo))
+        .catch(() => {})
+    }
     window.addEventListener(EVENT, sync)
-    window.addEventListener('storage', sync)
-    return () => {
-      window.removeEventListener(EVENT, sync)
-      window.removeEventListener('storage', sync)
+    return () => window.removeEventListener(EVENT, sync)
+  }, [])
+
+  const updateBalance = useCallback(async (newBalance: number) => {
+    setBalance(newBalance) // optimistic update
+    try {
+      const res = await api.put('/jugadores/me/saldo', { saldo: newBalance })
+      setBalance(res.data.saldo)
+      window.dispatchEvent(new Event(EVENT))
+    } catch {
+      console.error('Error al guardar saldo en el servidor')
     }
   }, [])
 
-  const updateBalance = useCallback((newBalance: number) => {
-    localStorage.setItem(KEY, String(newBalance))
-    setBalance(newBalance)
-    window.dispatchEvent(new Event(EVENT))
-  }, [])
-
-  return { balance, updateBalance }
+  return { balance, loading, updateBalance }
 }

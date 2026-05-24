@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBalance } from '../hooks/useBalance'
+import { useHistorial } from '@/hooks/useHistorial'
+
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const NUMBERS = [
@@ -39,6 +41,7 @@ function easeOut(t: number) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function Ruleta() {
+  const { registrar } = useHistorial()
   const navigate = useNavigate()
   const nombre   = localStorage.getItem('nombre') ?? 'Jugador'
 
@@ -141,6 +144,9 @@ export default function Ruleta() {
     }
 
     setOutcome(win ? 'win' : 'lose')
+
+    const net = win ? (betAmount * bet.multiplier) - betAmount : -betAmount
+    registrar('Ruleta', betAmount, net)
   }
 
   // ── Tile utils ────────────────────────────────────────────────────────────────

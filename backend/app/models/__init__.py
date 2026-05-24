@@ -9,3 +9,4 @@ from app.models.premio import Premio
 from app.models.pago import Pago
 from app.models.movimiento_caja import MovimientoCaja
 from app.models.historial_estado_jugador import HistorialEstadoJugador
+from app.models.historial import Historial

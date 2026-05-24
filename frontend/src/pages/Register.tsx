@@ -5,9 +5,6 @@ import api from '../api/axios'
 const ROLES = [
   { value: 'jugador',       label: 'Jugador'       },
   { value: 'administrador', label: 'Administrador' },
-  { value: 'supervisor',    label: 'Supervisor'    },
-  { value: 'crupier',       label: 'Crupier'       },
-  { value: 'cajero',        label: 'Cajero'        },
 ]
 
 export default function Register() {
