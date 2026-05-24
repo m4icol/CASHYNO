@@ -16,6 +16,7 @@ export default function Menu() {
     if (label === 'Ruleta') navigate('/ruleta')
     if (label === 'BlackJack') navigate('/blackjack')
     if (label === 'Historial') navigate('/historial')
+    if (label === 'Jugadores') navigate('/jugadores')
   }
 
 

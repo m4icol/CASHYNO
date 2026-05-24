@@ -86,3 +86,42 @@ def get_historial(
              .order_by(Historial.fecha.desc())\
              .limit(50)\
              .all()
+
+# Esquema de salida
+class JugadorOut(BaseModel):
+    id_jugador: int
+    nombre:     str
+    apellido:   str
+    estado:     str
+    saldo:      float
+
+    class Config:
+        from_attributes = True
+
+# GET — lista todos los jugadores (solo admin)
+@router.get("/", response_model=list[JugadorOut])
+def get_jugadores(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer),
+    db: Session = Depends(get_db)
+):
+    payload = decode_token(credentials.credentials)
+    if not payload or payload.get("role") != "administrador":
+        raise HTTPException(status_code=403, detail="Solo administradores")
+    return db.query(Jugador).order_by(Jugador.id_jugador).all()
+
+# PATCH — bloquear o desbloquear
+@router.patch("/{id_jugador}/estado")
+def cambiar_estado(
+    id_jugador: int,
+    credentials: HTTPAuthorizationCredentials = Depends(bearer),
+    db: Session = Depends(get_db)
+):
+    payload = decode_token(credentials.credentials)
+    if not payload or payload.get("role") != "administrador":
+        raise HTTPException(status_code=403, detail="Solo administradores")
+    jugador = db.query(Jugador).filter(Jugador.id_jugador == id_jugador).first()
+    if not jugador:
+        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+    jugador.estado = "BLOQUEADO" if jugador.estado == "ACTIVO" else "ACTIVO"
+    db.commit()
+    return {"id_jugador": jugador.id_jugador, "estado": jugador.estado}

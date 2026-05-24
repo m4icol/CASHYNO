@@ -38,6 +38,8 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     ).first()
 
     if jugador and verify_password(data.password, jugador.password_hash):
+        if jugador.estado == "BLOQUEADO":                        # ← agrega esto
+            raise HTTPException(status_code=403, detail="Usuario bloqueado")
         token = create_access_token({
             "sub": str(jugador.id_jugador),
             "role": "jugador",

@@ -6,6 +6,7 @@ import BlackJack from './pages/Blackjack'
 import './index.css'
 import Register from './pages/Register'
 import Historial from './pages/Historial'
+import Jugadores from './pages/Jugadores'
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token')
@@ -20,6 +21,14 @@ const JugadorRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>
 }
 
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const token = localStorage.getItem('token')
+  const role  = localStorage.getItem('role')
+  if (!token) return <Navigate to="/login" />
+  if (role !== 'administrador') return <Navigate to="/menu" />
+  return <>{children}</>
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -30,6 +39,7 @@ export default function App() {
         <Route path="/ruleta"    element={<JugadorRoute><Ruleta /></JugadorRoute>} />
         <Route path="/blackjack" element={<JugadorRoute><BlackJack /></JugadorRoute>} />
         <Route path="/historial" element={<JugadorRoute><Historial /></JugadorRoute>} />
+        <Route path="/jugadores" element={<AdminRoute><Jugadores /></AdminRoute>} />
         <Route path="*"          element={<Navigate to="/login" />} />
       </Routes>
     </BrowserRouter>
